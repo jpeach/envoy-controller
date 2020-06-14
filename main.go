@@ -23,6 +23,7 @@ import (
 
 	"github.com/jpeach/envoy-controller/pkg/cli"
 	"github.com/jpeach/envoy-controller/pkg/version"
+	_ "github.com/jpeach/envoy-controller/pkg/xds"
 
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
@@ -46,6 +47,7 @@ func main() {
 	})
 
 	root.AddCommand(cli.Defaults(cli.NewRunCommand()))
+	root.AddCommand(cli.Defaults(cli.NewCreateCommand()))
 
 	if err := root.Execute(); err != nil {
 		if msg := err.Error(); msg != "" {

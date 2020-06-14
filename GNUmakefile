@@ -38,6 +38,7 @@ build:
 .PHONY: generate
 generate: ## Generate build files
 generate:
+	$(GO) mod vendor
 	for prog in ./hack/generate-* ; do \
 		$$prog ; \
 	done
