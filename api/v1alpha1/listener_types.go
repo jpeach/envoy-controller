@@ -39,6 +39,7 @@ type ListenerStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // Listener is the Schema for the listeners API
 //

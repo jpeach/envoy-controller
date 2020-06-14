@@ -39,6 +39,7 @@ type RouteConfigurationStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // RouteConfiguration is the Schema for the routeconfigurations API
 //

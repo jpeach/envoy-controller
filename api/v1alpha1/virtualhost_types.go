@@ -39,6 +39,7 @@ type VirtualHostStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // VirtualHost is the Schema for the virtualhosts API
 //

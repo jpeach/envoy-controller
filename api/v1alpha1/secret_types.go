@@ -39,6 +39,7 @@ type SecretStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // Secret is the Schema for the secrets API
 //

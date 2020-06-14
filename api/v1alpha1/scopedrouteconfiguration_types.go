@@ -39,6 +39,7 @@ type ScopedRouteConfigurationStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // ScopedRouteConfiguration is the Schema for the scopedrouteconfigurations API
 //

@@ -39,6 +39,7 @@ type ClusterStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // Cluster is the Schema for the clusters API
 //
