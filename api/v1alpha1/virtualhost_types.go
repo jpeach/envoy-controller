@@ -20,22 +20,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // VirtualHostSpec defines the desired state of VirtualHost
 type VirtualHostSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of VirtualHost. Edit VirtualHost_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// +required
+	VirtualHost Message `json:"virtualHost"`
 }
 
 // VirtualHostStatus defines the observed state of VirtualHost
 type VirtualHostStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Conditions []Condition `json:"conditions"`
 }
 
 // +kubebuilder:object:root=true
