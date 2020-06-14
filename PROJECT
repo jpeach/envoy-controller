@@ -1,3 +1,25 @@
 domain: projectcontour.io
 repo: github.com/jpeach/envoy-controller
+resources:
+- group: envoy
+  kind: Listener
+  version: v1alpha1
+- group: envoy
+  kind: Cluster
+  version: v1alpha1
+- group: envoy
+  kind: RouteConfiguration
+  version: v1alpha1
+- group: envoy
+  kind: ScopedRouteConfiguration
+  version: v1alpha1
+- group: envoy
+  kind: Secret
+  version: v1alpha1
+- group: envoy
+  kind: Runtime
+  version: v1alpha1
+- group: envoy
+  kind: VirtualHost
+  version: v1alpha1
 version: "2"

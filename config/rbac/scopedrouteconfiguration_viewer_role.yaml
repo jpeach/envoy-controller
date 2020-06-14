@@ -1,0 +1,20 @@
+# permissions for end users to view scopedrouteconfigurations.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: scopedrouteconfiguration-viewer-role
+rules:
+- apiGroups:
+  - envoy.projectcontour.io
+  resources:
+  - scopedrouteconfigurations
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - envoy.projectcontour.io
+  resources:
+  - scopedrouteconfigurations/status
+  verbs:
+  - get

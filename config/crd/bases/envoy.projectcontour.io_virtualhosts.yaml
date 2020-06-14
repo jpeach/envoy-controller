@@ -1,0 +1,55 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.3.0
+  creationTimestamp: null
+  name: virtualhosts.envoy.projectcontour.io
+spec:
+  group: envoy.projectcontour.io
+  names:
+    kind: VirtualHost
+    listKind: VirtualHostList
+    plural: virtualhosts
+    singular: virtualhost
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: "VirtualHost is the Schema for the virtualhosts API \n https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#vhds"
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: VirtualHostSpec defines the desired state of VirtualHost
+            properties:
+              foo:
+                description: Foo is an example field of VirtualHost. Edit VirtualHost_types.go
+                  to remove/update
+                type: string
+            type: object
+          status:
+            description: VirtualHostStatus defines the observed state of VirtualHost
+            type: object
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
