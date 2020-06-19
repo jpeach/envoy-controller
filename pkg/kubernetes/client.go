@@ -31,8 +31,10 @@ func NewClient() (client.Client, error) {
 	})
 }
 
+// CreateOptionFunc generates a client.CreateOption.
 type CreateOptionFunc func(*client.CreateOptions)
 
+// ApplyToCreate ..
 func (f CreateOptionFunc) ApplyToCreate(o *client.CreateOptions) {
 	if f != nil {
 		f(o)

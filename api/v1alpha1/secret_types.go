@@ -20,13 +20,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SecretSpec defines the desired state of Secret
+// SecretSpec defines the desired state of Secret.
 type SecretSpec struct {
 	// +required
 	Secret Message `json:"secret"`
 }
 
-// SecretStatus defines the observed state of Secret
+// SecretStatus defines the observed state of Secret.
 type SecretStatus struct {
 	Conditions []Condition `json:"conditions"`
 }
@@ -34,7 +34,7 @@ type SecretStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Secret is the Schema for the secrets API
+// Secret is the Schema for the secrets API.
 //
 // https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#sds
 type Secret struct {
@@ -47,7 +47,7 @@ type Secret struct {
 
 // +kubebuilder:object:root=true
 
-// SecretList contains a list of Secret
+// SecretList contains a list of Secret.
 type SecretList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

@@ -27,16 +27,18 @@ import (
 	envoyv1alpha1 "github.com/jpeach/envoy-controller/api/v1alpha1"
 )
 
-// VirtualHostReconciler reconciles a VirtualHost object
+// VirtualHostReconciler reconciles a VirtualHost object.
 type VirtualHostReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
+// nolint(lll)
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=virtualhosts,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=virtualhosts/status,verbs=get;update;patch
 
+// Reconcile ...
 func (r *VirtualHostReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("virtualhost", req.NamespacedName)
@@ -46,6 +48,7 @@ func (r *VirtualHostReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	return ctrl.Result{}, nil
 }
 
+// SetupWithManager ...
 func (r *VirtualHostReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&envoyv1alpha1.VirtualHost{}).

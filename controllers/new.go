@@ -8,11 +8,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// Reconciler is a generic resource controller.
 type Reconciler interface {
 	Reconcile(req ctrl.Request) (ctrl.Result, error)
 	SetupWithManager(mgr ctrl.Manager) error
 }
 
+// New returns a Reconciler instance for the given resource kind.
 func New(kind string, c client.Client, s *runtime.Scheme) Reconciler {
 	switch kind {
 	case "Listener":

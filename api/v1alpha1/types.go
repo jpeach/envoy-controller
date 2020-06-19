@@ -39,12 +39,15 @@ type Condition struct {
 	// +required
 	Status metav1.ConditionStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
 	// If set, this represents the .metadata.generation that the condition was set based upon.
-	// For instance, if .metadata.generation is currently 12, but the .status.condition[x].observedGeneration is 9, the condition is out of date
-	// with respect to the current state of the instance.
+	// For instance, if .metadata.generation is currently 12, but
+	// the .status.condition[x].observedGeneration is 9, the condition
+	// is out of date with respect to the current state of the instance.
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty" protobuf:"varint,3,opt,name=observedGeneration"`
 	// Last time the condition transitioned from one status to another.
-	// This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+	// This should be when the underlying condition changed. If that
+	// is not known, then using the time when the API field changed
+	// is acceptable.
 	// +required
 	LastTransitionTime metav1.Time `json:"lastTransitionTime" protobuf:"bytes,4,opt,name=lastTransitionTime"`
 	// The reason for the condition's last transition in CamelCase.

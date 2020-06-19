@@ -20,13 +20,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ListenerSpec defines the desired state of Listener
+// ListenerSpec defines the desired state of Listener.
 type ListenerSpec struct {
 	// +required
 	Listener Message `json:"listener"`
 }
 
-// ListenerStatus defines the observed state of Listener
+// ListenerStatus defines the observed state of Listener.
 type ListenerStatus struct {
 	Conditions []Condition `json:"conditions"`
 }
@@ -34,7 +34,7 @@ type ListenerStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Listener is the Schema for the listeners API
+// Listener is the Schema for the listeners API.
 //
 // https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#lds
 type Listener struct {
@@ -47,7 +47,7 @@ type Listener struct {
 
 // +kubebuilder:object:root=true
 
-// ListenerList contains a list of Listener
+// ListenerList contains a list of Listener.
 type ListenerList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

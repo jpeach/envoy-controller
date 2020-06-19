@@ -27,7 +27,7 @@ import (
 	envoyv1alpha1 "github.com/jpeach/envoy-controller/api/v1alpha1"
 )
 
-// RuntimeReconciler reconciles a Runtime object
+// RuntimeReconciler reconciles a Runtime object.
 type RuntimeReconciler struct {
 	client.Client
 	Log    logr.Logger
@@ -37,6 +37,7 @@ type RuntimeReconciler struct {
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=runtimes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=runtimes/status,verbs=get;update;patch
 
+// Reconcile ...
 func (r *RuntimeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("runtime", req.NamespacedName)
@@ -46,6 +47,7 @@ func (r *RuntimeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
+// SetupWithManager ...
 func (r *RuntimeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&envoyv1alpha1.Runtime{}).

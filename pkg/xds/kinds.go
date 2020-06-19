@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 )
 
+// EnvoyVersion is the version of the Envoy API.
 type EnvoyVersion string
 
 // EnvoyVersionUnknown ...

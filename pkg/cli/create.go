@@ -43,6 +43,7 @@ func NamespaceOrDefault(ns string) string {
 	return metav1.NamespaceDefault
 }
 
+// NewCreateCommand ...
 func NewCreateCommand() *cobra.Command {
 	var kinds = []string{
 		"Listener",
@@ -84,7 +85,7 @@ func NewCreateCommand() *cobra.Command {
 				}
 
 				if fname := must.String(cmd.Flags().GetString("filename")); fname != "-" {
-					input, err = ioutil.ReadFile(fname)
+					input, err = ioutil.ReadFile(fname) // nolint(gosec)
 				} else {
 					input, err = ioutil.ReadAll(os.Stdin)
 				}
@@ -98,11 +99,11 @@ func NewCreateCommand() *cobra.Command {
 					return &ExitError{Code: EX_FAIL, Err: err}
 				}
 
-				if must.String(cmd.Flags().GetString("output")) == "" {
-					return createResource(obj)
-				} else {
+				if must.String(cmd.Flags().GetString("output")) != "" {
 					return formatResource(obj, must.String(cmd.Flags().GetString("output")))
 				}
+
+				return createResource(obj)
 			},
 		}
 
@@ -144,7 +145,8 @@ func formatResource(obj runtime.Object, format string) error {
 	}
 }
 
-func createResourceV3(kind string, name types.NamespacedName, in []byte, mtype protoreflect.MessageType) (runtime.Object, error) {
+func createResourceV3(
+	kind string, name types.NamespacedName, in []byte, mtype protoreflect.MessageType) (runtime.Object, error) {
 	// Unmarshal the JSON into an instance of the message type.
 	protoMessage := mtype.New().Interface()
 	if err := protojson.Unmarshal(in, protoMessage); err != nil {

@@ -20,13 +20,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// VirtualHostSpec defines the desired state of VirtualHost
+// VirtualHostSpec defines the desired state of VirtualHost.
 type VirtualHostSpec struct {
 	// +required
 	VirtualHost Message `json:"virtualHost"`
 }
 
-// VirtualHostStatus defines the observed state of VirtualHost
+// VirtualHostStatus defines the observed state of VirtualHost.
 type VirtualHostStatus struct {
 	Conditions []Condition `json:"conditions"`
 }
@@ -34,7 +34,7 @@ type VirtualHostStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// VirtualHost is the Schema for the virtualhosts API
+// VirtualHost is the Schema for the virtualhosts API.
 //
 // https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#vhds
 type VirtualHost struct {
@@ -47,7 +47,7 @@ type VirtualHost struct {
 
 // +kubebuilder:object:root=true
 
-// VirtualHostList contains a list of VirtualHost
+// VirtualHostList contains a list of VirtualHost.
 type VirtualHostList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

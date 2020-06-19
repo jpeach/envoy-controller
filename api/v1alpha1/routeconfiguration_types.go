@@ -20,12 +20,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// RouteConfigurationSpec defines the desired state of RouteConfiguration
+// RouteConfigurationSpec defines the desired state of RouteConfiguration.
 type RouteConfigurationSpec struct {
 	RouteConfiguration Message `json:"routeConfiguration"`
 }
 
-// RouteConfigurationStatus defines the observed state of RouteConfiguration
+// RouteConfigurationStatus defines the observed state of RouteConfiguration.
 type RouteConfigurationStatus struct {
 	Conditions []Condition `json:"conditions"`
 }
@@ -33,7 +33,7 @@ type RouteConfigurationStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// RouteConfiguration is the Schema for the routeconfigurations API
+// RouteConfiguration is the Schema for the routeconfigurations API.
 //
 // https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#rds
 type RouteConfiguration struct {
@@ -46,7 +46,7 @@ type RouteConfiguration struct {
 
 // +kubebuilder:object:root=true
 
-// RouteConfigurationList contains a list of RouteConfiguration
+// RouteConfigurationList contains a list of RouteConfiguration.
 type RouteConfigurationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

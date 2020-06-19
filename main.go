@@ -61,5 +61,4 @@ func main() {
 
 		os.Exit(int(cli.EX_FAIL))
 	}
-
 }

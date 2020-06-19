@@ -20,13 +20,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// RuntimeSpec defines the desired state of Runtime
+// RuntimeSpec defines the desired state of Runtime.
 type RuntimeSpec struct {
 	// +required
 	Runtime Message `json:"listener"`
 }
 
-// RuntimeStatus defines the observed state of Runtime
+// RuntimeStatus defines the observed state of Runtime.
 type RuntimeStatus struct {
 	Conditions []Condition `json:"conditions"`
 }
@@ -34,7 +34,7 @@ type RuntimeStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Runtime is the Schema for the runtimes API
+// Runtime is the Schema for the runtimes API.
 //
 // https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#rtds
 type Runtime struct {
@@ -47,7 +47,7 @@ type Runtime struct {
 
 // +kubebuilder:object:root=true
 
-// RuntimeList contains a list of Runtime
+// RuntimeList contains a list of Runtime.
 type RuntimeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

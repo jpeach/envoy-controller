@@ -20,13 +20,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ScopedRouteConfigurationSpec defines the desired state of ScopedRouteConfiguration
+// ScopedRouteConfigurationSpec defines the desired state of
+// ScopedRouteConfiguration.
 type ScopedRouteConfigurationSpec struct {
 	// +required
 	ScopedRouteConfiguration Message `json:"scopedRouteConfiguration"`
 }
 
-// ScopedRouteConfigurationStatus defines the observed state of ScopedRouteConfiguration
+// ScopedRouteConfigurationStatus defines the observed state of
+// ScopedRouteConfiguration.
 type ScopedRouteConfigurationStatus struct {
 	Conditions []Condition `json:"conditions"`
 }
@@ -34,7 +36,8 @@ type ScopedRouteConfigurationStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// ScopedRouteConfiguration is the Schema for the scopedrouteconfigurations API
+// ScopedRouteConfiguration is the Schema for the scopedrouteconfigurations
+// API.
 //
 // https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#srds
 type ScopedRouteConfiguration struct {
@@ -47,7 +50,7 @@ type ScopedRouteConfiguration struct {
 
 // +kubebuilder:object:root=true
 
-// ScopedRouteConfigurationList contains a list of ScopedRouteConfiguration
+// ScopedRouteConfigurationList contains a list of ScopedRouteConfiguration.
 type ScopedRouteConfigurationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

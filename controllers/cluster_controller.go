@@ -27,7 +27,7 @@ import (
 	envoyv1alpha1 "github.com/jpeach/envoy-controller/api/v1alpha1"
 )
 
-// ClusterReconciler reconciles a Cluster object
+// ClusterReconciler reconciles a Cluster object.
 type ClusterReconciler struct {
 	client.Client
 	Log    logr.Logger
@@ -37,6 +37,7 @@ type ClusterReconciler struct {
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=clusters,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=clusters/status,verbs=get;update;patch
 
+// Reconcile ...
 func (r *ClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("cluster", req.NamespacedName)
@@ -46,6 +47,7 @@ func (r *ClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
+// SetupWithManager ...
 func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&envoyv1alpha1.Cluster{}).

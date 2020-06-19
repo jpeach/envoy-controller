@@ -27,16 +27,19 @@ import (
 	envoyv1alpha1 "github.com/jpeach/envoy-controller/api/v1alpha1"
 )
 
-// ScopedRouteConfigurationReconciler reconciles a ScopedRouteConfiguration object
+// ScopedRouteConfigurationReconciler reconciles a ScopedRouteConfiguration
+// object.
 type ScopedRouteConfigurationReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
+// nolint(lll)
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=scopedrouteconfigurations,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=scopedrouteconfigurations/status,verbs=get;update;patch
 
+// Reconcile ...
 func (r *ScopedRouteConfigurationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("scopedrouteconfiguration", req.NamespacedName)
@@ -46,6 +49,7 @@ func (r *ScopedRouteConfigurationReconciler) Reconcile(req ctrl.Request) (ctrl.R
 	return ctrl.Result{}, nil
 }
 
+// SetupWithManager ...
 func (r *ScopedRouteConfigurationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&envoyv1alpha1.ScopedRouteConfiguration{}).
