@@ -19,6 +19,10 @@ const (
 	// way.  This should only be used for user's data and not
 	// system files.
 	EX_DATAERR ExitCode = 65 //nolint(golint)
+
+	// EX_CONFIG means that something was found in an unconfigured
+	// or misconfigured state.
+	EX_CONFIG ExitCode = 78 //nolint(golint)
 )
 
 // ExitError captures an ExitCode and its associated error message.

@@ -1,12 +1,14 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 
 	envoyv1alpha1 "github.com/jpeach/envoy-controller/api/v1alpha1"
+	"github.com/jpeach/envoy-controller/pkg/kubernetes"
 	"github.com/jpeach/envoy-controller/pkg/must"
 	"github.com/jpeach/envoy-controller/pkg/xds"
 
@@ -76,13 +78,11 @@ func NewCreateCommand() *cobra.Command {
 					return &ExitError{Code: EX_FAIL, Err: err}
 				}
 
-				//  TODO(jpeach): only emit YAML if the "-o yaml" flag is passed.
-				p := printers.YAMLPrinter{}
-				must.Must(p.PrintObj(obj, os.Stdout))
-
-				// TOTO(jpeach): unless we are doing YAML, apply to cluster.
-
-				return nil
+				if must.String(cmd.Flags().GetString("output")) == "" {
+					return createResource(obj)
+				} else {
+					return formatResource(obj, must.String(cmd.Flags().GetString("output")))
+				}
 			},
 		}
 
@@ -91,8 +91,35 @@ func NewCreateCommand() *cobra.Command {
 
 	cmd.PersistentFlags().StringP("namespace", "n", "", "The namespace in which to create the resource.")
 	cmd.PersistentFlags().StringP("filename", "f", "-", "Filename used to create the resource.")
+	cmd.PersistentFlags().StringP("output", "o", "", "Output the object as YAML or JSON instead of creating it.")
 
 	return &cmd
+}
+
+func createResource(obj runtime.Object) error {
+	client, err := kubernetes.NewClient()
+	if err != nil {
+		return &ExitError{EX_CONFIG, err}
+	}
+
+	if err := client.Create(context.Background(), obj, kubernetes.CreateOptionFunc(nil)); err != nil {
+		return &ExitError{EX_FAIL, err}
+	}
+
+	return nil
+}
+
+func formatResource(obj runtime.Object, format string) error {
+	switch format {
+	case "yaml":
+		p := printers.YAMLPrinter{}
+		return p.PrintObj(obj, os.Stdout)
+	case "json":
+		p := printers.JSONPrinter{}
+		return p.PrintObj(obj, os.Stdout)
+	default:
+		return ExitErrorf(EX_USAGE, "unsupported output format %q", format)
+	}
 }
 
 func createResourceV3(kind string, name types.NamespacedName, in []byte) (runtime.Object, error) {

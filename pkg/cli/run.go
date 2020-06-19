@@ -1,13 +1,11 @@
 package cli
 
 import (
-	envoyv1alpha1 "github.com/jpeach/envoy-controller/api/v1alpha1"
 	"github.com/jpeach/envoy-controller/controllers"
+	"github.com/jpeach/envoy-controller/pkg/kubernetes"
 	"github.com/jpeach/envoy-controller/pkg/must"
 
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -28,13 +26,8 @@ func NewRunCommand() *cobra.Command {
 				"VirtualHost",
 			}
 
-			s := runtime.NewScheme()
-
-			must.Must(scheme.AddToScheme(s))
-			must.Must(envoyv1alpha1.AddToScheme(s))
-
 			mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-				Scheme:             s,
+				Scheme:             kubernetes.NewScheme(),
 				MetricsBindAddress: must.String(cmd.Flags().GetString("metrics-address")),
 				LeaderElection:     must.Bool(cmd.Flags().GetBool("enable-leader-election")),
 				LeaderElectionID:   "06187118.projectcontour.io",
