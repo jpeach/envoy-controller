@@ -13,14 +13,26 @@ import (
 	"github.com/jpeach/envoy-controller/pkg/xds"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"google.golang.org/protobuf/reflect/protoregistry"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/printers"
 )
+
+func envoyVersion(flags *pflag.FlagSet) xds.EnvoyVersion {
+	if must.Bool(flags.GetBool("2")) {
+		return xds.EnvoyVersion2
+	}
+
+	if must.Bool(flags.GetBool("3")) {
+		return xds.EnvoyVersion3
+	}
+
+	return xds.EnvoyVersion3
+}
 
 // NamespaceOrDefault returns the namespace ns, or "default" if ns is empty.
 func NamespaceOrDefault(ns string) string {
@@ -62,6 +74,15 @@ func NewCreateCommand() *cobra.Command {
 				var input []byte
 				var err error
 
+				if must.Bool(cmd.Flags().GetBool("2")) && must.Bool(cmd.Flags().GetBool("3")) {
+					return ExitErrorf(EX_USAGE, "multiple Envoy API versions specified")
+				}
+
+				mtype, err := xds.ProtobufForKind(envoyVersion(cmd.Flags()), k)
+				if err != nil {
+					return &ExitError{EX_CONFIG, err}
+				}
+
 				if fname := must.String(cmd.Flags().GetString("filename")); fname != "-" {
 					input, err = ioutil.ReadFile(fname)
 				} else {
@@ -72,8 +93,7 @@ func NewCreateCommand() *cobra.Command {
 					return &ExitError{Code: EX_DATAERR, Err: err}
 				}
 
-				// TODO(jpeach): add API version support.
-				obj, err := createResourceV3(k, name, input)
+				obj, err := createResourceV3(k, name, input, mtype)
 				if err != nil {
 					return &ExitError{Code: EX_FAIL, Err: err}
 				}
@@ -92,6 +112,8 @@ func NewCreateCommand() *cobra.Command {
 	cmd.PersistentFlags().StringP("namespace", "n", "", "The namespace in which to create the resource.")
 	cmd.PersistentFlags().StringP("filename", "f", "-", "Filename used to create the resource.")
 	cmd.PersistentFlags().StringP("output", "o", "", "Output the object as YAML or JSON instead of creating it.")
+	cmd.PersistentFlags().BoolP("3", "3", false, "Output the object as YAML or JSON instead of creating it.")
+	cmd.PersistentFlags().BoolP("2", "2", false, "Output the object as YAML or JSON instead of creating it.")
 
 	return &cmd
 }
@@ -122,25 +144,9 @@ func formatResource(obj runtime.Object, format string) error {
 	}
 }
 
-func createResourceV3(kind string, name types.NamespacedName, in []byte) (runtime.Object, error) {
-	protoForKind := map[string]string{
-		"Listener":                 "envoy.config.listener.v3.Listener",
-		"Cluster":                  "envoy.config.cluster.v3.Cluster",
-		"RouteConfiguration":       "envoy.config.route.v3.RouteConfiguration",
-		"ScopedRouteConfiguration": "envoy.config.route.v3.ScopedRouteConfiguration",
-		"Secret":                   "envoy.extensions.transport_sockets.tls.v3.Secret",
-		"Runtime":                  "envoy.service.runtime.v3.Runtime",
-		"VirtualHost":              "envoy.config.route.v3.VirtualHost",
-	}
-
-	// First, find the message type for the kind.
-	messageType, err := protoregistry.GlobalTypes.FindMessageByName(protoreflect.FullName(protoForKind[kind]))
-	if err != nil {
-		return nil, fmt.Errorf("protobuf message type %q: %s", protoForKind[kind], err)
-	}
-
-	// Next, unmarshal the JSON into an instance of the message type.
-	protoMessage := messageType.New().Interface()
+func createResourceV3(kind string, name types.NamespacedName, in []byte, mtype protoreflect.MessageType) (runtime.Object, error) {
+	// Unmarshal the JSON into an instance of the message type.
+	protoMessage := mtype.New().Interface()
 	if err := protojson.Unmarshal(in, protoMessage); err != nil {
 		return nil, err
 	}
