@@ -33,7 +33,7 @@ help:
 .PHONY: build
 build: ## Build
 build:
-	@$(GO) build -ldflags "$(GO_BUILD_LDFLAGS)" -o $(BIN) .
+	@$(GO) build -mod=readonly -ldflags "$(GO_BUILD_LDFLAGS)" -o $(BIN) .
 
 .PHONY: generate
 generate: ## Generate build files
