@@ -4,6 +4,8 @@ import (
 	"github.com/jpeach/envoy-controller/controllers"
 	"github.com/jpeach/envoy-controller/pkg/kubernetes"
 	"github.com/jpeach/envoy-controller/pkg/must"
+	"github.com/jpeach/envoy-controller/pkg/util"
+	"github.com/jpeach/envoy-controller/pkg/xds"
 
 	"github.com/spf13/cobra"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -26,6 +28,13 @@ func NewRunCommand() *cobra.Command {
 				"VirtualHost",
 			}
 
+			xdsServer := xds.NewServer()
+			xdsListener, err := util.NewListener(must.String(cmd.Flags().GetString("xds-address")))
+			if err != nil {
+				return ExitErrorf(EX_CONFIG, "invalid xDS listener address %q: %w",
+					must.String(cmd.Flags().GetString("xds-address")), err)
+			}
+
 			mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 				Scheme:             kubernetes.NewScheme(),
 				MetricsBindAddress: must.String(cmd.Flags().GetString("metrics-address")),
@@ -43,15 +52,36 @@ func NewRunCommand() *cobra.Command {
 				}
 			}
 
-			if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-				return ExitErrorf(EX_FAIL, "problem running manager: %w", err)
-			}
+			errChan := make(chan error)
+			stopChan := ctrl.SetupSignalHandler()
 
-			return nil
+			go func() {
+				if err := xdsServer.Start(xdsListener, stopChan); err != nil {
+					errChan <- ExitErrorf(EX_FAIL, "xDS server failed: %w", err)
+				}
+
+				errChan <- nil
+			}()
+
+			go func() {
+				if err := mgr.Start(stopChan); err != nil {
+					errChan <- ExitErrorf(EX_FAIL, "controller manager failed: %w", err)
+				}
+
+				errChan <- nil
+			}()
+
+			select {
+			case err := <-errChan:
+				return err
+			case <-stopChan:
+				return nil
+			}
 		},
 	}
 
 	cmd.Flags().String("metrics-address", ":8080", "The address the metric endpoint binds to.")
+	cmd.Flags().String("xds-address", ":8080", "The address the xDS endpoint binds to.")
 	cmd.Flags().Bool("enable-leader-election", false,
 		"Enable leader election to ensure there is only one active controller.")
 
