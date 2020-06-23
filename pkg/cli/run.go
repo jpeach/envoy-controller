@@ -6,6 +6,7 @@ import (
 	"github.com/jpeach/envoy-controller/pkg/must"
 	"github.com/jpeach/envoy-controller/pkg/util"
 	"github.com/jpeach/envoy-controller/pkg/xds"
+	"google.golang.org/grpc"
 
 	"github.com/spf13/cobra"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -28,7 +29,7 @@ func NewRunCommand() *cobra.Command {
 				"VirtualHost",
 			}
 
-			xdsServer := xds.NewServer()
+			xdsServer := xds.NewServer(grpc.MaxConcurrentStreams(1 << 20))
 			xdsListener, err := util.NewListener(must.String(cmd.Flags().GetString("xds-address")))
 			if err != nil {
 				return ExitErrorf(EX_CONFIG, "invalid xDS listener address %q: %w",
