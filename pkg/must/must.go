@@ -16,6 +16,8 @@ package must
 
 import (
 	"time"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // Must panics if the error is set.
@@ -77,4 +79,13 @@ func Int(i int, err error) int {
 	}
 
 	return i
+}
+
+// GroupVersionKind panics if the error is set, otherwise returns gvk.
+func GroupVersionKind(gvk schema.GroupVersionKind, err error) schema.GroupVersionKind {
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return gvk
 }

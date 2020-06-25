@@ -19,7 +19,6 @@ func NewRunCommand() *cobra.Command {
 		Short: "Run the Envoy controller",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			xdsServer := xds.NewServer(grpc.MaxConcurrentStreams(1 << 20))
 			xdsListener, err := util.NewListener(must.String(cmd.Flags().GetString("xds-address")))
 			if err != nil {
 				return ExitErrorf(EX_CONFIG, "invalid xDS listener address %q: %w",
@@ -36,11 +35,17 @@ func NewRunCommand() *cobra.Command {
 				return ExitErrorf(EX_FAIL, "unable to start manager: %w", err)
 			}
 
-			for _, k := range xds.Kinds() {
-				r := controllers.New(k, mgr.GetClient(), mgr.GetScheme())
-				if err := r.SetupWithManager(mgr); err != nil {
-					return ExitErrorf(EX_FAIL, "unable to create %q reconciler: %w", k, err)
-				}
+			xdsServer := xds.NewServer(grpc.MaxConcurrentStreams(1 << 20))
+
+			envoyController := controllers.EnvoyReconciler{
+				Client:        mgr.GetClient(),
+				Log:           ctrl.Log.WithName("envoy.controller"),
+				Scheme:        mgr.GetScheme(),
+				ResourceStore: xdsServer,
+			}
+
+			if err := envoyController.SetupWithManager(mgr); err != nil {
+				return ExitErrorf(EX_FAIL, "unable to create Envoy reconciler: %w", err)
 			}
 
 			errChan := make(chan error)
@@ -72,7 +77,7 @@ func NewRunCommand() *cobra.Command {
 	}
 
 	cmd.Flags().String("metrics-address", ":8080", "The address the metric endpoint binds to.")
-	cmd.Flags().String("xds-address", ":8080", "The address the xDS endpoint binds to.")
+	cmd.Flags().String("xds-address", "/var/run/xds.sock", "The address the xDS endpoint binds to.")
 	cmd.Flags().Bool("enable-leader-election", false,
 		"Enable leader election to ensure there is only one active controller.")
 

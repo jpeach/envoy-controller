@@ -7,6 +7,9 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// Any ...
+type Any = any.Any
+
 // ProtoV1 converts a V2 message to V1.
 func ProtoV1(message proto.Message) protov1.Message {
 	return protov1.MessageV1(message)
@@ -17,7 +20,18 @@ func ProtoV2(message protov1.Message) proto.Message {
 	return protov1.MessageV2(message)
 }
 
-// MarshalAny marshals a message into an any.Any type.
-func MarshalAny(message proto.Message) (*any.Any, error) {
+// MarshalAny marshals a message into an Any type.
+func MarshalAny(message proto.Message) (*Any, error) {
 	return ptypes.MarshalAny(ProtoV1(message))
+}
+
+// UnmarshalAny unmarshals an Any message.
+func UnmarshalAny(anyMessage *Any) (proto.Message, error) {
+	var x ptypes.DynamicAny
+
+	if err := ptypes.UnmarshalAny(anyMessage, &x); err != nil {
+		return nil, err
+	}
+
+	return ProtoV2(x.Message), nil
 }

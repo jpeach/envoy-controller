@@ -24,6 +24,7 @@ import (
 	serverV2 "github.com/envoyproxy/go-control-plane/pkg/server/v2"
 	serverV3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -33,6 +34,8 @@ type Server struct {
 	v3   serverV3.Server
 	grpc *grpc.Server
 }
+
+var _ ResourceStore = &Server{}
 
 // NewServer returns a new xDS server for both the v2 and v3 Envoy
 // API. The internal cache always uses the identity node hash since
@@ -124,4 +127,19 @@ func (srv *Server) Start(listener net.Listener, stopChan <-chan struct{}) error 
 		srv.Stop()
 		return nil
 	}
+}
+
+// UpdateResource ...
+func (srv *Server) UpdateResource(name string, message proto.Message) {
+	// TODO(jpeach) Enforce the invariant that names are globally unique.
+	switch VersionForMessage(message.ProtoReflect().Descriptor()) {
+	case EnvoyVersion2:
+	case EnvoyVersion3:
+	}
+}
+
+// DeleteResource ...
+func (srv *Server) DeleteResource(name string) {
+	// name is globally unique, so we can safely delete the
+	// corresponding entry from both the v2 and v3 resources.
 }
