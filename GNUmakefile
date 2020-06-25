@@ -86,3 +86,9 @@ docker-build:
 # Push the docker image
 docker-push:
 	$(DOCKER) push ${IMG}
+
+.PHONY: clean
+clean: ## Remove build artifacts
+	$(GO) clean ./...
+	$(RM_F) $(BIN) cover.out vendor/
+
