@@ -19,16 +19,6 @@ func NewRunCommand() *cobra.Command {
 		Short: "Run the Envoy controller",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var kinds = []string{
-				"Listener",
-				"Cluster",
-				"RouteConfiguration",
-				"ScopedRouteConfiguration",
-				"Secret",
-				"Runtime",
-				"VirtualHost",
-			}
-
 			xdsServer := xds.NewServer(grpc.MaxConcurrentStreams(1 << 20))
 			xdsListener, err := util.NewListener(must.String(cmd.Flags().GetString("xds-address")))
 			if err != nil {
@@ -46,7 +36,7 @@ func NewRunCommand() *cobra.Command {
 				return ExitErrorf(EX_FAIL, "unable to start manager: %w", err)
 			}
 
-			for _, k := range kinds {
+			for _, k := range xds.Kinds() {
 				r := controllers.New(k, mgr.GetClient(), mgr.GetScheme())
 				if err := r.SetupWithManager(mgr); err != nil {
 					return ExitErrorf(EX_FAIL, "unable to create %q reconciler: %w", k, err)

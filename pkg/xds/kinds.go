@@ -20,6 +20,19 @@ const EnvoyVersion2 = "v2"
 // EnvoyVersion3 ...
 const EnvoyVersion3 = "v3"
 
+// Kinds returns the names of the Envoy API kinds.
+func Kinds() []string {
+	return []string{
+		"Listener",
+		"Cluster",
+		"RouteConfiguration",
+		"ScopedRouteConfiguration",
+		"Secret",
+		"Runtime",
+		"VirtualHost",
+	}
+}
+
 // ProtobufForKind returns the versioned MessageType for the given resource kind.
 func ProtobufForKind(vers EnvoyVersion, kind string) (protoreflect.MessageType, error) {
 	var protoForKind map[string]string

@@ -45,22 +45,12 @@ func NamespaceOrDefault(ns string) string {
 
 // NewCreateCommand ...
 func NewCreateCommand() *cobra.Command {
-	var kinds = []string{
-		"Listener",
-		"Cluster",
-		"RouteConfiguration",
-		"ScopedRouteConfiguration",
-		"Secret",
-		"Runtime",
-		"VirtualHost",
-	}
-
 	cmd := cobra.Command{
 		Use:   "create RESOURCE NAME [OPTIONS]",
 		Short: "Create an Envoy resource from a file or stdin",
 	}
 
-	for _, k := range kinds {
+	for _, k := range xds.Kinds() {
 		k := k
 		kindCmd := &cobra.Command{
 			Use:   fmt.Sprintf("%s NAME [OPTIONS]", strings.ToLower(k)),
