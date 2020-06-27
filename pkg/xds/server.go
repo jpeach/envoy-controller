@@ -130,7 +130,7 @@ func (srv *Server) Start(listener net.Listener, stopChan <-chan struct{}) error 
 }
 
 // UpdateResource ...
-func (srv *Server) UpdateResource(name string, message proto.Message) {
+func (srv *Server) UpdateResource(name ResourceName, vers ResourceVersion, message proto.Message) {
 	// TODO(jpeach) Enforce the invariant that names are globally unique.
 	switch VersionForMessage(message.ProtoReflect().Descriptor()) {
 	case EnvoyVersion2:
@@ -139,7 +139,7 @@ func (srv *Server) UpdateResource(name string, message proto.Message) {
 }
 
 // DeleteResource ...
-func (srv *Server) DeleteResource(name string) {
+func (srv *Server) DeleteResource(name ResourceName) {
 	// name is globally unique, so we can safely delete the
 	// corresponding entry from both the v2 and v3 resources.
 }

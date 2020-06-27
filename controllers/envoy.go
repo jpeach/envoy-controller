@@ -9,6 +9,7 @@ import (
 	envoyv1alpha1 "github.com/jpeach/envoy-controller/api/v1alpha1"
 	"github.com/jpeach/envoy-controller/pkg/must"
 	"github.com/jpeach/envoy-controller/pkg/xds"
+	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -31,8 +32,19 @@ var factories = []func() runtime.Object{
 	func() runtime.Object { return &envoyv1alpha1.VirtualHost{} },
 }
 
-func resourceOf(name types.NamespacedName, gvk schema.GroupVersionKind) string {
-	return strings.ToLower(path.Join(name.Namespace, gvk.Kind, name.Name))
+func resourceOf(name types.NamespacedName, gvk schema.GroupVersionKind) xds.ResourceName {
+	return xds.ResourceName(
+		strings.ToLower(path.Join(name.Namespace, gvk.Kind, name.Name)),
+	)
+}
+
+func versionOf(obj runtime.Object) xds.ResourceVersion {
+	metaObj := must.Object(meta.Accessor(obj))
+
+	return xds.ResourceVersion{
+		Identifier: string(metaObj.GetUID()),
+		Version:    metaObj.GetResourceVersion(),
+	}
 }
 
 func anyOf(m envoyv1alpha1.Message) xds.Any {
@@ -128,7 +140,7 @@ func (e *EnvoyReconciler) Reconcile(req ctrl.Request, obj runtime.Object, gvk sc
 	log.Info("updated resource")
 	// TODO(jpeach) update status
 
-	e.ResourceStore.UpdateResource(resourceOf(req.NamespacedName, gvk), resource)
+	e.ResourceStore.UpdateResource(resourceOf(req.NamespacedName, gvk), versionOf(obj), resource)
 
 	return ctrl.Result{}, nil
 }

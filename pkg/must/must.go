@@ -17,6 +17,7 @@ package must
 import (
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -88,4 +89,13 @@ func GroupVersionKind(gvk schema.GroupVersionKind, err error) schema.GroupVersio
 	}
 
 	return gvk
+}
+
+// Object panics if the error is set, otherwise returns gvk.
+func Object(o metav1.Object, err error) metav1.Object {
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return o
 }
