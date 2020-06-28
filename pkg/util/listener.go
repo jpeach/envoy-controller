@@ -2,6 +2,7 @@ package util
 
 import (
 	"net"
+	"os"
 	"strings"
 )
 
@@ -13,5 +14,19 @@ func NewListener(addr string) (net.Listener, error) {
 		return net.Listen("tcp", addr)
 	}
 
+	if IsUnixSocket(addr) {
+		os.Remove(addr) //nolint(gosec)
+	}
+
 	return net.Listen("unix", addr)
+}
+
+// IsUnixSocket returns true if the path is a unix domain socket.
+func IsUnixSocket(path string) bool {
+	s, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+
+	return (s.Mode() & os.ModeSocket) == os.ModeSocket
 }
