@@ -103,8 +103,8 @@ func NewCreateCommand() *cobra.Command {
 	cmd.PersistentFlags().StringP("namespace", "n", "", "The namespace in which to create the resource.")
 	cmd.PersistentFlags().StringP("filename", "f", "-", "Filename used to create the resource.")
 	cmd.PersistentFlags().StringP("output", "o", "", "Output the object as YAML or JSON instead of creating it.")
-	cmd.PersistentFlags().BoolP("3", "3", false, "Output the object as YAML or JSON instead of creating it.")
-	cmd.PersistentFlags().BoolP("2", "2", false, "Output the object as YAML or JSON instead of creating it.")
+	cmd.PersistentFlags().BoolP("3", "3", false, "Create the object for the Envoy v2 API.")
+	cmd.PersistentFlags().BoolP("2", "2", false, "Create the object for the Envoy v3 API.")
 
 	return &cmd
 }
@@ -143,7 +143,7 @@ func createResourceV3(
 		return nil, err
 	}
 
-	//  TODO(jpeach): if the protobug object has a "name" field,
+	//  TODO(jpeach): if the protobuf object has a "name" field,
 	// force it to match the fully qualified Kubernetes resource
 	// name.
 
