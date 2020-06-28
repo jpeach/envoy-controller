@@ -22,7 +22,11 @@ import (
 	"os"
 
 	"github.com/jpeach/envoy-controller/pkg/cli"
+	"github.com/jpeach/envoy-controller/pkg/must"
+	"github.com/jpeach/envoy-controller/pkg/util"
 	"github.com/jpeach/envoy-controller/pkg/version"
+
+	// Ensure that xDS protobuf types are always registered.
 	_ "github.com/jpeach/envoy-controller/pkg/xds"
 
 	"github.com/mattn/go-isatty"
@@ -32,19 +36,33 @@ import (
 
 	// Initialize all known client auth plugins.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	// +kubebuilder:scaffold:imports
 )
 
 func main() {
-	ctrl.SetLogger(zap.New(
-		zap.UseDevMode(isatty.IsTerminal(os.Stdout.Fd())),
-	))
-
 	root := cli.Defaults(&cobra.Command{
 		Use:     version.Progname,
 		Short:   "Kubernetes controller for the Envoy proxy",
 		Version: fmt.Sprintf("%s/%s, built %s", version.Version, version.Sha, version.BuildDate),
 	})
+
+	// Initialize logging in the pre-run so that we can parse
+	// the debug flag globally. Presumably, no sub-command will
+	// ever use a pre-run.
+	root.PersistentPreRun = func(*cobra.Command, []string) {
+		opts := []zap.Opts{
+			zap.UseDevMode(isatty.IsTerminal(os.Stdout.Fd())),
+		}
+
+		// We have to use root here, because the local cmd
+		// var is a the Command instance for the subcommand.
+		if must.Bool(root.PersistentFlags().GetBool("debug")) {
+			opts = append(opts, zap.Level(util.ZapEnableDebug()))
+		}
+
+		ctrl.SetLogger(zap.New(opts...))
+	}
+
+	root.PersistentFlags().Bool("debug", false, "Enable debug logging and behavior.")
 
 	root.AddCommand(cli.Defaults(cli.NewRunCommand()))
 	root.AddCommand(cli.Defaults(cli.NewCreateCommand()))
