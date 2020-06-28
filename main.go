@@ -48,6 +48,7 @@ func main() {
 
 	root.AddCommand(cli.Defaults(cli.NewRunCommand()))
 	root.AddCommand(cli.Defaults(cli.NewCreateCommand()))
+	root.AddCommand(cli.Defaults(cli.NewBootstrapCommand()))
 
 	if err := root.Execute(); err != nil {
 		if msg := err.Error(); msg != "" {
