@@ -21,6 +21,7 @@ import (
 	secretserviceV3 "github.com/envoyproxy/go-control-plane/envoy/service/secret/v3"
 	cacheV2 "github.com/envoyproxy/go-control-plane/pkg/cache/v2"
 	cacheV3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/log"
 	serverV2 "github.com/envoyproxy/go-control-plane/pkg/server/v2"
 	serverV3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"google.golang.org/grpc"
@@ -41,36 +42,35 @@ var _ ResourceStore = &Server{}
 // API. The internal cache always uses the identity node hash since
 // the deployment model is one envoy-controller for each Envoy server.
 func NewServer(options ...grpc.ServerOption) *Server {
-	log := ctrl.Log.WithName("xds")
-	debug := log.V(1)
+	logger := ctrl.Log.WithName("xds")
 
 	// The logr API just plain sucks. Why on earth it is baked
 	// into controller-runtime is beyond me.
-	logger := LoggerFuncs{
+	l := log.LoggerFuncs{
 		DebugFunc: func(format string, args ...interface{}) {
-			debug.Info(fmt.Sprintf(format, args...))
+			logger.V(1).Info(fmt.Sprintf(format, args...))
 		},
 		InfoFunc: func(format string, args ...interface{}) {
-			log.Info(fmt.Sprintf(format, args...))
+			logger.Info(fmt.Sprintf(format, args...))
 		},
 		WarnFunc: func(format string, args ...interface{}) {
-			log.Info(fmt.Sprintf(format, args...))
+			logger.Info(fmt.Sprintf(format, args...))
 		},
 		ErrorFunc: func(format string, args ...interface{}) {
-			log.Info(fmt.Sprintf(format, args...))
+			logger.Info(fmt.Sprintf(format, args...))
 		},
 	}
 
 	srv := Server{
 		v2: serverV2.NewServer(
 			context.Background(),
-			cacheV2.NewSnapshotCache(true /* ads */, cacheV2.IDHash{}, logger),
+			cacheV2.NewSnapshotCache(true /* ads */, cacheV2.IDHash{}, l),
 			nil, /* callbacks */
 		),
 
 		v3: serverV3.NewServer(
 			context.Background(),
-			cacheV3.NewSnapshotCache(true /* ads */, cacheV3.IDHash{}, logger),
+			cacheV3.NewSnapshotCache(true /* ads */, cacheV3.IDHash{}, l),
 			nil, /* callbacks */
 		),
 

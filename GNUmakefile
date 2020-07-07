@@ -19,7 +19,7 @@ GO_BUILD_LDFLAGS := \
 	-X $(REPO)/pkg/version.Version=$(VERSION) \
 	-X $(REPO)/pkg/version.Sha=$(SHA) \
 	-X $(REPO)/pkg/version.BuildDate=$(BUILDDATE)
- 
+
 # Image URL to use all building/pushing image targets
 IMG ?= $(BIN):$(VERSION)
 
@@ -43,17 +43,14 @@ generate:
 		$$prog ; \
 	done
 
-
 .PHONY: check
 check: ## Run tests
 check:
 	$(GO) test ./... -coverprofile cover.out
 
-
 # Install CRDs into a cluster
 install: manifests
 	kustomize build config/crd | kubectl apply -f -
-
 
 # Uninstall CRDs from a cluster
 uninstall: manifests
@@ -91,4 +88,3 @@ docker-push:
 clean: ## Remove build artifacts
 	$(GO) clean ./...
 	$(RM_F) $(BIN) cover.out vendor/
-
