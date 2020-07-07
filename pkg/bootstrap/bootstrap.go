@@ -103,6 +103,13 @@ func ManagementAddress(addr *Address) Option {
 	}
 }
 
+// EnableIncrementalDiscovery enables incremental (Delta) xDS.
+func EnableIncrementalDiscovery() Option {
+	return func(b *Bootstrap) {
+		b.DynamicResources.AdsConfig.ApiType = envoy_config_core_v3.ApiConfigSource_DELTA_GRPC
+	}
+}
+
 // New returns a new bootstrap protobuf.
 func New(options ...Option) (proto.Message, error) {
 	type Admin = envoy_config_bootstrap_v3.Admin                                 //nolint

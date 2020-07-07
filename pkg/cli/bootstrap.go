@@ -54,14 +54,20 @@ func NewBootstrapCommand() *cobra.Command {
 				out = file
 			}
 
-			boot, err := bootstrap.New(
+			opts := []bootstrap.Option{
 				bootstrap.NodeCluster(must.String(os.Hostname())),
 				bootstrap.NodeID(must.String(os.Hostname())),
 				bootstrap.ResourceVersion(vers),
 				bootstrap.ManagementAddress(xdsAddr),
 				bootstrap.AdminAddress(adminAddr),
 				bootstrap.AdminAccessLog(must.String(cmd.Flags().GetString("admin-accesslog"))),
-			)
+			}
+
+			if must.Bool(cmd.Flags().GetBool("xds-incremental")) {
+				opts = append(opts, bootstrap.EnableIncrementalDiscovery())
+			}
+
+			boot, err := bootstrap.New(opts...)
 			if err != nil {
 				return ExitError{EX_FAIL, err}
 			}
@@ -80,6 +86,7 @@ func NewBootstrapCommand() *cobra.Command {
 	cmd.Flags().String("admin-address", ":8080", "The address the Envoy admin endpoint binds to.")
 	cmd.Flags().String("admin-accesslog", "/dev/null", "Path for the Envoy admin endpoint access log.")
 	cmd.Flags().String("xds-address", "/var/run/xds.sock", "The address the xDS endpoint binds to.")
+	cmd.Flags().Bool("xds-incremental", false, "Enable the incremental (delta) xDS protocol.")
 
 	cmd.Flags().StringP("filename", "f", "-", "Filename used to create the resource.")
 	cmd.Flags().BoolP("3", "3", false, "Bootstrap Envoy to default to the v3 API.")
