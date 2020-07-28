@@ -58,6 +58,7 @@ func NewBootstrapCommand() *cobra.Command {
 				bootstrap.NodeCluster(must.String(os.Hostname())),
 				bootstrap.NodeID(must.String(os.Hostname())),
 				bootstrap.ResourceVersion(vers),
+				bootstrap.ManagementClusterName(must.String(cmd.Flags().GetString("xds-clustername"))),
 				bootstrap.ManagementAddress(xdsAddr),
 				bootstrap.AdminAddress(adminAddr),
 				bootstrap.AdminAccessLog(must.String(cmd.Flags().GetString("admin-accesslog"))),
@@ -86,6 +87,7 @@ func NewBootstrapCommand() *cobra.Command {
 	cmd.Flags().String("admin-address", ":8080", "The address the Envoy admin endpoint binds to.")
 	cmd.Flags().String("admin-accesslog", "/dev/null", "Path for the Envoy admin endpoint access log.")
 	cmd.Flags().String("xds-address", "/var/run/xds.sock", "The address the xDS endpoint binds to.")
+	cmd.Flags().String("xds-clustername", "envoy-controller", "The name to use for the xDS management cluster.")
 	cmd.Flags().Bool("xds-incremental", false, "Enable the incremental (delta) xDS protocol.")
 
 	cmd.Flags().StringP("filename", "f", "-", "Filename used to create the resource.")

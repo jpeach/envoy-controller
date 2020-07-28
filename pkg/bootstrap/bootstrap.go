@@ -32,25 +32,25 @@ const (
 )
 
 // Option ...
-type Option func(*Bootstrap)
+type Option func(*Bootstrap, map[string]string)
 
 // NodeID sets the envoy node ID.
 func NodeID(s string) Option {
-	return func(b *Bootstrap) {
+	return func(b *Bootstrap, _ map[string]string) {
 		b.Node.Id = s
 	}
 }
 
 // NodeCluster sets the envoy node Cluster name.
 func NodeCluster(s string) Option {
-	return func(b *Bootstrap) {
+	return func(b *Bootstrap, _ map[string]string) {
 		b.Node.Cluster = s
 	}
 }
 
 // ResourceVersion sets the default resource API version Envoy will ask for.
 func ResourceVersion(vers APIVersion) Option {
-	return func(b *Bootstrap) {
+	return func(b *Bootstrap, _ map[string]string) {
 		b.DynamicResources.LdsConfig.ResourceApiVersion = vers
 		b.DynamicResources.CdsConfig.ResourceApiVersion = vers
 	}
@@ -58,31 +58,33 @@ func ResourceVersion(vers APIVersion) Option {
 
 // SetNodeOnFirstMessageOnly tells Envoy to only send the Node message once.
 func SetNodeOnFirstMessageOnly(value bool) Option {
-	return func(b *Bootstrap) {
+	return func(b *Bootstrap, _ map[string]string) {
 		b.DynamicResources.AdsConfig.SetNodeOnFirstMessageOnly = value
 	}
 }
 
 // AdminAccessLog set the access log path for the admin endpoint.
 func AdminAccessLog(path string) Option {
-	return func(b *Bootstrap) {
+	return func(b *Bootstrap, _ map[string]string) {
 		b.Admin.AccessLogPath = path
 	}
 }
 
 // AdminAddress sets the address the admin server will listen on.
 func AdminAddress(addr *Address) Option {
-	return func(b *Bootstrap) {
+	return func(b *Bootstrap, _ map[string]string) {
 		b.Admin.Address = addr
 	}
 }
 
 // ManagementAddress sets the address to connect to the xDS management server.
 func ManagementAddress(addr *Address) Option {
-	return func(b *Bootstrap) {
+	return func(b *Bootstrap, ctx map[string]string) {
+		xdsName := ctx["xds-name"]
+
 		for _, c := range b.StaticResources.Clusters {
 			// Find the xDS cluster.
-			if c.LoadAssignment.ClusterName != "xds" {
+			if c.LoadAssignment.ClusterName != xdsName {
 				continue
 			}
 
@@ -103,9 +105,33 @@ func ManagementAddress(addr *Address) Option {
 	}
 }
 
+// ManagementClusterName sets the name of the xDS management cluster.
+// This is the name that must be subsequently used to build ConfigSource
+// messages in Envoy resources.
+func ManagementClusterName(name string) Option {
+	return func(b *Bootstrap, ctx map[string]string) {
+		oldName := ctx["xds-name"]
+
+		for _, c := range b.StaticResources.Clusters {
+			if c.Name == oldName {
+				c.Name = name
+				c.LoadAssignment.ClusterName = name
+			}
+		}
+
+		for _, g := range b.DynamicResources.GetAdsConfig().GetGrpcServices() {
+			if g.GetEnvoyGrpc().GetClusterName() == oldName {
+				g.GetEnvoyGrpc().ClusterName = name
+			}
+		}
+
+		ctx["xds-name"] = name
+	}
+}
+
 // EnableIncrementalDiscovery enables incremental (Delta) xDS.
 func EnableIncrementalDiscovery() Option {
-	return func(b *Bootstrap) {
+	return func(b *Bootstrap, _ map[string]string) {
 		b.DynamicResources.AdsConfig.ApiType = envoy_config_core_v3.ApiConfigSource_DELTA_GRPC
 	}
 }
@@ -120,6 +146,11 @@ func New(options ...Option) (proto.Message, error) {
 	type GrpcService = envoy_config_core_v3.GrpcService                          //nolint
 	type Node = envoy_config_core_v3.Node                                        //nolint
 	type StaticResources = envoy_config_bootstrap_v3.Bootstrap_StaticResources   //nolint
+
+	// ctx is ann out-of-band handshake that the bootstrap options can use to communicate state.
+	ctx := map[string]string{
+		"xds-name": "37C8466B-0931-4E24-9B6E-582B3134632A",
+	}
 
 	b := &Bootstrap{
 		Node: &Node{
@@ -139,14 +170,14 @@ func New(options ...Option) (proto.Message, error) {
 			Clusters: []*Cluster{
 				//nolint(gofmt)
 				&Cluster{
-					Name:                 "xds",
+					Name:                 ctx["xds-name"],
 					ConnectTimeout:       ptypes.DurationProto(time.Second * 10),
 					Http2ProtocolOptions: &envoy_config_core_v3.Http2ProtocolOptions{},
 					ClusterDiscoveryType: &envoy_config_cluster_v3.Cluster_Type{
 						Type: envoy_config_cluster_v3.Cluster_STATIC,
 					},
 					LoadAssignment: &envoy_config_endpoint_v3.ClusterLoadAssignment{
-						ClusterName: "xds",
+						ClusterName: ctx["xds-name"],
 						Endpoints: []*envoy_config_endpoint_v3.LocalityLbEndpoints{
 							&envoy_config_endpoint_v3.LocalityLbEndpoints{
 								LbEndpoints: []*envoy_config_endpoint_v3.LbEndpoint{},
@@ -171,7 +202,6 @@ func New(options ...Option) (proto.Message, error) {
 			AdsConfig: &ApiConfigSource{
 				ApiType:                   envoy_config_core_v3.ApiConfigSource_GRPC,
 				TransportApiVersion:       ApiVersion_V3,
-				ClusterNames:              []string{},
 				RefreshDelay:              nil,
 				RequestTimeout:            nil,
 				RateLimitSettings:         nil,
@@ -181,7 +211,7 @@ func New(options ...Option) (proto.Message, error) {
 					&GrpcService{
 						TargetSpecifier: &envoy_config_core_v3.GrpcService_EnvoyGrpc_{
 							EnvoyGrpc: &envoy_config_core_v3.GrpcService_EnvoyGrpc{
-								ClusterName: "xds",
+								ClusterName: ctx["xds-name"],
 							},
 						},
 					},
@@ -204,7 +234,7 @@ func New(options ...Option) (proto.Message, error) {
 	}
 
 	for _, o := range options {
-		o(b)
+		o(b, ctx)
 	}
 
 	if err := b.Validate(); err != nil {
