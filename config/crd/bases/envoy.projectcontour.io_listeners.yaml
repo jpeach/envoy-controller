@@ -19,7 +19,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: "Listener is the Schema for the listeners API \n https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#lds"
+        description: "Listener is the Schema for the listeners API. \n https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/operations/dynamic_configuration.html#lds"
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -30,7 +30,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: ListenerSpec defines the desired state of Listener
+            description: ListenerSpec defines the desired state of Listener.
             properties:
               listener:
                 description: "Message is a protobuf Any message. \n https://developers.google.com/protocol-buffers/docs/proto3#any"
@@ -48,14 +48,14 @@ spec:
             - listener
             type: object
           status:
-            description: ListenerStatus defines the observed state of Listener
+            description: ListenerStatus defines the observed state of Listener.
             properties:
               conditions:
                 items:
                   description: "Condition is a general Status condition. \n https://github.com/kubernetes/enhancements/tree/master/keps/sig-api-machinery/1623-standardize-conditions"
                   properties:
                     lastTransitionTime:
-                      description: Last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      description: Last time the condition transitioned from one status to another. This should be when the underlying condition changed. If that is not known, then using the time when the API field changed is acceptable.
                       format: date-time
                       type: string
                     message:
