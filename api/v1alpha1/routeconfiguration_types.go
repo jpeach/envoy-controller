@@ -44,6 +44,23 @@ type RouteConfiguration struct {
 	Status RouteConfigurationStatus `json:"status,omitempty"`
 }
 
+// GetStatusConditions ...
+func (c *RouteConfiguration) GetStatusConditions() []Condition {
+	return c.Status.Conditions
+}
+
+// SetStatusConditions ...
+func (c *RouteConfiguration) SetStatusConditions(conditions []Condition) {
+	c.Status.Conditions = conditions
+}
+
+// GetSpecMessage ...
+func (c *RouteConfiguration) GetSpecMessage() *Message {
+	return &c.Spec.RouteConfiguration
+}
+
+var _ Object = &RouteConfiguration{}
+
 // +kubebuilder:object:root=true
 
 // RouteConfigurationList contains a list of RouteConfiguration.

@@ -25,7 +25,7 @@ case $# in
 *) usage;;
 esac
 
-readonly CLUSTER=${CLUSTER:-"envoy-devel"}
+readonly CLUSTER=${CLUSTER:-"envoy-controller"}
 
 kind::cluster::list() {
     ${KIND} get clusters
@@ -74,7 +74,7 @@ if ! kind::cluster::exists "$CLUSTER" ; then
     kind::cluster::create
 fi
 
-kind::cluster::load "docker.io/envoyproxy/envoy:v1.14.3"
+kind::cluster::load "docker.io/envoyproxy/envoy:v1.15.0"
 kind::cluster::load "docker.io/agervais/ingress-conformance-echo:latest"
 
 ${KUBECTL} apply -f <(${KUSTOMIZE} build ${REPO}/config/crd)

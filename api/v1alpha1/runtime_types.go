@@ -45,6 +45,23 @@ type Runtime struct {
 	Status RuntimeStatus `json:"status,omitempty"`
 }
 
+// GetStatusConditions ...
+func (r *Runtime) GetStatusConditions() []Condition {
+	return r.Status.Conditions
+}
+
+// SetStatusConditions ...
+func (r *Runtime) SetStatusConditions(conditions []Condition) {
+	r.Status.Conditions = conditions
+}
+
+// GetSpecMessage ...
+func (r *Runtime) GetSpecMessage() *Message {
+	return &r.Spec.Runtime
+}
+
+var _ Object = &Runtime{}
+
 // +kubebuilder:object:root=true
 
 // RuntimeList contains a list of Runtime.

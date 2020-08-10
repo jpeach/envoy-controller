@@ -45,6 +45,23 @@ type Listener struct {
 	Status ListenerStatus `json:"status,omitempty"`
 }
 
+// GetStatusConditions ...
+func (l *Listener) GetStatusConditions() []Condition {
+	return l.Status.Conditions
+}
+
+// SetStatusConditions ...
+func (l *Listener) SetStatusConditions(conditions []Condition) {
+	l.Status.Conditions = conditions
+}
+
+// GetSpecMessage ...
+func (l *Listener) GetSpecMessage() *Message {
+	return &l.Spec.Listener
+}
+
+var _ Object = &Listener{}
+
 // +kubebuilder:object:root=true
 
 // ListenerList contains a list of Listener.

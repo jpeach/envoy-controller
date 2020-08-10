@@ -16,7 +16,27 @@ limitations under the License.
 
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
+)
+
+// Object captures common aspects of all Envoy resource types. In
+// particular, it gives API clients a generic way to access the
+// .Spec.Message and .Status.Condition fields.
+//
+// nolint(godot)
+// +kubebuilder:object:generate=false
+type Object interface {
+	runtime.Object
+
+	// GetStatusConditions returns the .Status.Conditions field.
+	GetStatusConditions() []Condition
+	// SetStatusConditions sets the .Status.Conditions field.
+	SetStatusConditions([]Condition)
+	// GetSpecMessage returns the .Spec.Message field.
+	GetSpecMessage() *Message
+}
 
 // Message is a protobuf Any message.
 //

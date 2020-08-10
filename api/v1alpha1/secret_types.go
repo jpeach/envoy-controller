@@ -45,6 +45,23 @@ type Secret struct {
 	Status SecretStatus `json:"status,omitempty"`
 }
 
+// GetStatusConditions ...
+func (s *Secret) GetStatusConditions() []Condition {
+	return s.Status.Conditions
+}
+
+// SetStatusConditions ...
+func (s *Secret) SetStatusConditions(conditions []Condition) {
+	s.Status.Conditions = conditions
+}
+
+// GetSpecMessage ...
+func (s *Secret) GetSpecMessage() *Message {
+	return &s.Spec.Secret
+}
+
+var _ Object = &Secret{}
+
 // +kubebuilder:object:root=true
 
 // SecretList contains a list of Secret.

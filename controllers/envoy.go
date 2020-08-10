@@ -7,12 +7,15 @@ import (
 	"strings"
 
 	envoyv1alpha1 "github.com/jpeach/envoy-controller/api/v1alpha1"
+	"github.com/jpeach/envoy-controller/pkg/kubernetes"
 	"github.com/jpeach/envoy-controller/pkg/must"
 	"github.com/jpeach/envoy-controller/pkg/xds"
-	"k8s.io/apimachinery/pkg/api/meta"
 
 	"github.com/go-logr/logr"
+	"google.golang.org/protobuf/proto"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -47,7 +50,7 @@ func versionOf(obj runtime.Object) xds.ResourceVersion {
 	}
 }
 
-func anyOf(m envoyv1alpha1.Message) xds.Any {
+func anyOf(m *envoyv1alpha1.Message) xds.Any {
 	return xds.Any{
 		TypeUrl: m.Type,
 		Value:   m.Value,
@@ -60,6 +63,37 @@ type EnvoyReconciler struct {
 	Log           logr.Logger
 	Scheme        *runtime.Scheme
 	ResourceStore xds.ResourceStore
+}
+
+// AcceptResource decides whether the given Envoy resource sould be accepted.
+func AcceptResource(obj envoyv1alpha1.Object, gvk schema.GroupVersionKind) (proto.Message, *kubernetes.AcceptanceError) {
+	any := anyOf(obj.GetSpecMessage())
+
+	// Verify that the type URL is acceptable for the kind.
+	if xds.KindForTypename(any.TypeUrl) != gvk.Kind {
+		return nil, &kubernetes.AcceptanceError{
+			Reason:  "TypeAmbiguity",
+			Message: fmt.Sprintf("invalid type %q for resource kind %q", any.TypeUrl, gvk.Kind),
+		}
+	}
+
+	resource, err := xds.UnmarshalAny(&any)
+	if err != nil {
+		return nil, &kubernetes.AcceptanceError{
+			Reason:  "InvalidFormat",
+			Message: err.Error(),
+		}
+	}
+
+	// Run protobuf validation for the resource.
+	if err := xds.Validate(resource); err != nil {
+		return nil, &kubernetes.AcceptanceError{
+			Reason:  "FailedValidation",
+			Message: fmt.Sprintf("protobuf validation error: %s", err),
+		}
+	}
+
+	return resource, nil
 }
 
 // nolint(lll)
@@ -81,7 +115,7 @@ type EnvoyReconciler struct {
 // Reconcile ...
 //
 // nolint(lll)
-func (e *EnvoyReconciler) Reconcile(req ctrl.Request, obj runtime.Object, gvk schema.GroupVersionKind) (ctrl.Result, error) {
+func (e *EnvoyReconciler) Reconcile(req ctrl.Request, o runtime.Object, gvk schema.GroupVersionKind) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := e.Log.WithValues(
 		"kind", gvk.Kind,
@@ -89,7 +123,7 @@ func (e *EnvoyReconciler) Reconcile(req ctrl.Request, obj runtime.Object, gvk sc
 		"resource", resourceOf(req.NamespacedName, gvk),
 	)
 
-	if err := e.Get(ctx, req.NamespacedName, obj); err != nil {
+	if err := e.Get(ctx, req.NamespacedName, o); err != nil {
 		if apierrors.IsNotFound(err) {
 			log.Info("deleting resource")
 			e.ResourceStore.DeleteResource(resourceOf(req.NamespacedName, gvk))
@@ -100,46 +134,59 @@ func (e *EnvoyReconciler) Reconcile(req ctrl.Request, obj runtime.Object, gvk sc
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	var any xds.Any
-
-	switch obj := obj.(type) {
-	case *envoyv1alpha1.Listener:
-		any = anyOf(obj.Spec.Listener)
-	case *envoyv1alpha1.Cluster:
-		any = anyOf(obj.Spec.Cluster)
-	case *envoyv1alpha1.RouteConfiguration:
-		any = anyOf(obj.Spec.RouteConfiguration)
-	case *envoyv1alpha1.ScopedRouteConfiguration:
-		any = anyOf(obj.Spec.ScopedRouteConfiguration)
-	case *envoyv1alpha1.Secret:
-		any = anyOf(obj.Spec.Secret)
-	case *envoyv1alpha1.Runtime:
-		any = anyOf(obj.Spec.Runtime)
-	case *envoyv1alpha1.VirtualHost:
-		any = anyOf(obj.Spec.VirtualHost)
-	default:
-		log.Info("invalid resource type", "type", fmt.Sprintf("%T", obj))
-		// TODO(jpeach) set error status.
-	}
-
-	// Verify that the type URL is acceptable for the kind.
-	if xds.KindForTypename(any.TypeUrl) != gvk.Kind {
-		// TODO(jpeach) set error status.
-		log.Error(fmt.Errorf("type %s is not valid for a resource of kind %q", any.TypeUrl, gvk.Kind),
-			"invalid spec.type")
+	// Convert to and Envoy resource object so we can access fields generically.
+	obj, ok := o.(envoyv1alpha1.Object)
+	if !ok {
+		log.Error(fmt.Errorf("resource is not an Envoy object"), "invalid resource type",
+			"type", fmt.Sprintf("%T", obj))
 		return ctrl.Result{}, nil
 	}
 
-	resource, err := xds.UnmarshalAny(&any)
+	accepted := kubernetes.NewAcceptedCondition(obj)
+
+	// Do initial acceptance validation.
+	resource, err := AcceptResource(obj, gvk)
 	if err != nil {
-		/// TODO(jpeach) set error status.
-		log.Error(err, "failed to unmarshal Envoy resource")
-		return ctrl.Result{}, nil
+		accepted.Status = metav1.ConditionFalse
+		accepted.Reason = err.Reason
+		accepted.Message = err.Message
 	}
 
-	log.Info("updated resource")
-	// TODO(jpeach) update status
+	var conditions []envoyv1alpha1.Condition
 
+	// Preserve all conditions except "Accepted".
+	for _, c := range obj.GetStatusConditions() {
+		if c.Type != "Accepted" {
+			conditions = append(conditions, c)
+		}
+	}
+
+	conditions = append(conditions, *accepted)
+	obj.SetStatusConditions(conditions)
+
+	// Update the status condition on this object. The default
+	// for new "Accepted" conditions is "True", switching to "False"
+	// if we reject for any reason.
+	if err := e.Client.Status().Update(ctx, obj); err != nil {
+		// Requeue (rate-limited) if we lost an update race.
+		if apierrors.IsConflict(err) {
+			return ctrl.Result{Requeue: true}, nil
+		}
+
+		log.Error(err, "failed to update .Status.Conditions")
+		return ctrl.Result{}, err
+	}
+
+	switch accepted.Status {
+	case metav1.ConditionFalse:
+		log.Info("rejected resource", "reason", accepted.Reason, "message", accepted.Message)
+		return ctrl.Result{}, nil
+	default:
+		log.Info("accepted resource")
+
+	}
+
+	log.Info("", "resource", resource)
 	e.ResourceStore.UpdateResource(resourceOf(req.NamespacedName, gvk), versionOf(obj), resource)
 
 	return ctrl.Result{}, nil

@@ -35,3 +35,12 @@ func UnmarshalAny(anyMessage *Any) (proto.Message, error) {
 
 	return ProtoV2(x.Message), nil
 }
+
+// Validate calls the `Validate` method of the proto.Message, if it has one.
+func Validate(message proto.Message) error {
+	if v, ok := interface{}(message).(interface{ Validate() error }); ok {
+		return v.Validate()
+	}
+
+	return nil
+}

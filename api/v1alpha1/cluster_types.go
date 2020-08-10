@@ -45,6 +45,23 @@ type Cluster struct {
 	Status ClusterStatus `json:"status,omitempty"`
 }
 
+// GetStatusConditions ...
+func (c *Cluster) GetStatusConditions() []Condition {
+	return c.Status.Conditions
+}
+
+// SetStatusConditions ...
+func (c *Cluster) SetStatusConditions(conditions []Condition) {
+	c.Status.Conditions = conditions
+}
+
+// GetSpecMessage ...
+func (c *Cluster) GetSpecMessage() *Message {
+	return &c.Spec.Cluster
+}
+
+var _ Object = &Cluster{}
+
 // +kubebuilder:object:root=true
 
 // ClusterList contains a list of Cluster.

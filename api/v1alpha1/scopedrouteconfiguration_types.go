@@ -48,6 +48,23 @@ type ScopedRouteConfiguration struct {
 	Status ScopedRouteConfigurationStatus `json:"status,omitempty"`
 }
 
+// GetStatusConditions ...
+func (c *ScopedRouteConfiguration) GetStatusConditions() []Condition {
+	return c.Status.Conditions
+}
+
+// SetStatusConditions ...
+func (c *ScopedRouteConfiguration) SetStatusConditions(conditions []Condition) {
+	c.Status.Conditions = conditions
+}
+
+// GetSpecMessage ...
+func (c *ScopedRouteConfiguration) GetSpecMessage() *Message {
+	return &c.Spec.ScopedRouteConfiguration
+}
+
+var _ Object = &ScopedRouteConfiguration{}
+
 // +kubebuilder:object:root=true
 
 // ScopedRouteConfigurationList contains a list of ScopedRouteConfiguration.
