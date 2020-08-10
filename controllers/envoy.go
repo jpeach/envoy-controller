@@ -66,8 +66,11 @@ type EnvoyReconciler struct {
 	ResourceStore xds.ResourceStore
 }
 
-// AcceptResource decides whether the given Envoy resource sould be accepted.
-func AcceptResource(obj envoyv1alpha1.Object, gvk schema.GroupVersionKind) (proto.Message, *kubernetes.AcceptanceError) {
+// AcceptResource decides whether the given Envoy resource should be accepted.
+func AcceptResource(obj envoyv1alpha1.Object, gvk schema.GroupVersionKind) (
+	proto.Message,
+	*kubernetes.AcceptanceError,
+) {
 	any := anyOf(obj.GetSpecMessage())
 
 	// Verify that the type URL is acceptable for the kind.

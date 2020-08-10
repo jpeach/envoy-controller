@@ -42,22 +42,24 @@ func ProtobufForKind(vers EnvoyVersion, kind string) (protoreflect.MessageType, 
 	switch vers {
 	case EnvoyVersion2:
 		protoForKind = map[string]string{
-			"Listener":                 "envoy.api.v2.Listener",
 			"Cluster":                  "envoy.api.v2.Cluster",
+			"ClusterLoadAssignment":    "envoy.api.v2.ClusterLoadAssignment",
+			"Listener":                 "envoy.api.v2.Listener",
 			"RouteConfiguration":       "envoy.api.v2.RouteConfiguration",
+			"Runtime":                  "envoy.service.discovery.v2.Runtime",
 			"ScopedRouteConfiguration": "envoy.api.v2.ScopedRouteConfiguration",
 			"Secret":                   "envoy.api.v2.auth.Secret",
-			"Runtime":                  "envoy.service.discovery.v2.Runtime",
 			"VirtualHost":              "envoy.api.v2.route.VirtualHost",
 		}
 	case EnvoyVersion3:
 		protoForKind = map[string]string{
-			"Listener":                 "envoy.config.listener.v3.Listener",
 			"Cluster":                  "envoy.config.cluster.v3.Cluster",
+			"ClusterLoadAssignment":    "envoy.config.endpoint.v3.ClusterLoadAssignment",
+			"Listener":                 "envoy.config.listener.v3.Listener",
 			"RouteConfiguration":       "envoy.config.route.v3.RouteConfiguration",
+			"Runtime":                  "envoy.service.runtime.v3.Runtime",
 			"ScopedRouteConfiguration": "envoy.config.route.v3.ScopedRouteConfiguration",
 			"Secret":                   "envoy.extensions.transport_sockets.tls.v3.Secret",
-			"Runtime":                  "envoy.service.runtime.v3.Runtime",
 			"VirtualHost":              "envoy.config.route.v3.VirtualHost",
 		}
 	default:
@@ -77,20 +79,22 @@ func ProtobufForKind(vers EnvoyVersion, kind string) (protoreflect.MessageType, 
 // any.Any type URL.
 func KindForTypename(typeName string) string {
 	messageKinds := map[string]string{
-		"envoy.api.v2.Listener":                            "Listener",
 		"envoy.api.v2.Cluster":                             "Cluster",
+		"envoy.api.v2.ClusterLoadAssignment":               "ClusterLoadAssignment",
+		"envoy.api.v2.Listener":                            "Listener",
 		"envoy.api.v2.RouteConfiguration":                  "RouteConfiguration",
-		"envoy.api.v2.ScopedRouteConfiguration":            "ScopedRouteConfiguraton",
+		"envoy.api.v2.ScopedRouteConfiguration":            "ScopedRouteConfiguration",
 		"envoy.api.v2.auth.Secret":                         "Secret",
-		"envoy.service.discovery.v2.Runtime":               "Runtime",
 		"envoy.api.v2.route.VirtualHost":                   "VirtualHost",
-		"envoy.config.listener.v3.Listener":                "Listener",
 		"envoy.config.cluster.v3.Cluster":                  "Cluster",
+		"envoy.config.endpoint.v3.ClusterLoadAssignment":   "ClusterLoadAssignment",
+		"envoy.config.listener.v3.Listener":                "Listener",
 		"envoy.config.route.v3.RouteConfiguration":         "RouteConfiguration",
 		"envoy.config.route.v3.ScopedRouteConfiguration":   "ScopedRouteConfiguration",
-		"envoy.extensions.transport_sockets.tls.v3.Secret": "Secret",
-		"envoy.service.runtime.v3.Runtime":                 "Runtime",
 		"envoy.config.route.v3.VirtualHost":                "VirtualHost",
+		"envoy.extensions.transport_sockets.tls.v3.Secret": "Secret",
+		"envoy.service.discovery.v2.Runtime":               "Runtime",
+		"envoy.service.runtime.v3.Runtime":                 "Runtime",
 	}
 
 	// If we got a TypeURL, strip the prefix.
@@ -102,20 +106,22 @@ func KindForTypename(typeName string) string {
 // VersionForMessage returns the Envoy API version that matches the given message type.
 func VersionForMessage(m protoreflect.MessageDescriptor) EnvoyVersion {
 	messageVersions := map[protoreflect.FullName]EnvoyVersion{
-		"envoy.api.v2.Listener":                            EnvoyVersion2,
 		"envoy.api.v2.Cluster":                             EnvoyVersion2,
+		"envoy.api.v2.ClusterLoadAssignment":               EnvoyVersion2,
+		"envoy.api.v2.Listener":                            EnvoyVersion2,
 		"envoy.api.v2.RouteConfiguration":                  EnvoyVersion2,
 		"envoy.api.v2.ScopedRouteConfiguration":            EnvoyVersion2,
 		"envoy.api.v2.auth.Secret":                         EnvoyVersion2,
-		"envoy.service.discovery.v2.Runtime":               EnvoyVersion2,
 		"envoy.api.v2.route.VirtualHost":                   EnvoyVersion2,
-		"envoy.config.listener.v3.Listener":                EnvoyVersion3,
+		"envoy.service.discovery.v2.Runtime":               EnvoyVersion2,
 		"envoy.config.cluster.v3.Cluster":                  EnvoyVersion3,
+		"envoy.config.endpoint.v3.ClusterLoadAssignment":   EnvoyVersion3,
+		"envoy.config.listener.v3.Listener":                EnvoyVersion3,
 		"envoy.config.route.v3.RouteConfiguration":         EnvoyVersion3,
 		"envoy.config.route.v3.ScopedRouteConfiguration":   EnvoyVersion3,
+		"envoy.config.route.v3.VirtualHost":                EnvoyVersion3,
 		"envoy.extensions.transport_sockets.tls.v3.Secret": EnvoyVersion3,
 		"envoy.service.runtime.v3.Runtime":                 EnvoyVersion3,
-		"envoy.config.route.v3.VirtualHost":                EnvoyVersion3,
 	}
 
 	if vers, ok := messageVersions[m.FullName()]; ok {
