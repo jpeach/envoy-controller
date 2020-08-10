@@ -22,4 +22,7 @@ resources:
 - group: envoy
   kind: VirtualHost
   version: v1alpha1
+- group: envoy
+  kind: ClusterLoadAssignment
+  version: v1alpha1
 version: "2"

@@ -26,12 +26,13 @@ import (
 )
 
 var factories = []func() runtime.Object{
-	func() runtime.Object { return &envoyv1alpha1.Listener{} },
+	func() runtime.Object { return &envoyv1alpha1.ClusterLoadAssignment{} },
 	func() runtime.Object { return &envoyv1alpha1.Cluster{} },
+	func() runtime.Object { return &envoyv1alpha1.Listener{} },
 	func() runtime.Object { return &envoyv1alpha1.RouteConfiguration{} },
+	func() runtime.Object { return &envoyv1alpha1.Runtime{} },
 	func() runtime.Object { return &envoyv1alpha1.ScopedRouteConfiguration{} },
 	func() runtime.Object { return &envoyv1alpha1.Secret{} },
-	func() runtime.Object { return &envoyv1alpha1.Runtime{} },
 	func() runtime.Object { return &envoyv1alpha1.VirtualHost{} },
 }
 
@@ -97,6 +98,8 @@ func AcceptResource(obj envoyv1alpha1.Object, gvk schema.GroupVersionKind) (prot
 }
 
 // nolint(lll)
+// +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=clusterloadassignments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=clusterloadassignments/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=clusters,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=clusters/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=envoy.projectcontour.io,resources=listeners,verbs=get;list;watch;create;update;patch;delete

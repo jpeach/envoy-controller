@@ -1,0 +1,20 @@
+# permissions for end users to view clusterloadassignments.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: clusterloadassignment-viewer-role
+rules:
+- apiGroups:
+  - envoy.projectcontour.io
+  resources:
+  - clusterloadassignments
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - envoy.projectcontour.io
+  resources:
+  - clusterloadassignments/status
+  verbs:
+  - get

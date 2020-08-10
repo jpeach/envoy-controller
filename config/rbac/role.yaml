@@ -9,6 +9,26 @@ rules:
 - apiGroups:
   - envoy.projectcontour.io
   resources:
+  - clusterloadassignments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - envoy.projectcontour.io
+  resources:
+  - clusterloadassignments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - envoy.projectcontour.io
+  resources:
   - clusters
   verbs:
   - create

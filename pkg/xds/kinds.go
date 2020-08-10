@@ -24,12 +24,13 @@ const EnvoyVersion3 = "v3"
 // Kinds returns the names of the Envoy API kinds.
 func Kinds() []string {
 	return []string{
-		"Listener",
 		"Cluster",
+		"ClusterLoadAssignment",
+		"Listener",
 		"RouteConfiguration",
+		"Runtime",
 		"ScopedRouteConfiguration",
 		"Secret",
-		"Runtime",
 		"VirtualHost",
 	}
 }
